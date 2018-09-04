@@ -1,5 +1,5 @@
 # dmux
-[![Build Status](https://travis-ci.org/talend-glorieux/dmux.svg?branch=master)](https://travis-ci.org/talend-glorieux/dmux)
+[![Build Status](https://travis-ci.org/talend-glorieux/dmux.svg?branch=master)](https://travis-ci.org/talend-glorieux/dmux) [![Go Report Card](https://goreportcard.com/badge/github.com/talend-glorieux/dmux)](https://goreportcard.com/report/github.com/talend-glorieux/dmux)
 
 Making multi-repository builds simple.
 
