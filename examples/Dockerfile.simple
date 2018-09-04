@@ -1,0 +1,9 @@
+---
+git:
+  git@github.com:Talend/ui.git: master
+---
+FROM node:9.2-alpine
+WORKDIR /home/node/app
+RUN apk add --no-cache python make g++
+ADD ui .
+RUN yarn install

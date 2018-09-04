@@ -1,0 +1,10 @@
+---
+files:
+  - ./examples/example.txt
+  - ./examples/dir
+---
+FROM alpine
+ADD example.txt .
+RUN cat example.txt
+ADD dir dir
+RUN cat dir/example-dir.txt
