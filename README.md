@@ -1,4 +1,5 @@
 # dmux
+[![Build Status](https://travis-ci.org/talend-glorieux/dmux.svg?branch=master)](https://travis-ci.org/talend-glorieux/dmux)
 
 Making multi-repository builds simple.
 
