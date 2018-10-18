@@ -7,4 +7,5 @@ FROM alpine
 ADD example.txt .
 RUN cat example.txt
 ADD dir dir
+LABEL build_tag=dmux-example:1
 RUN cat dir/example-dir.txt
