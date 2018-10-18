@@ -14,6 +14,7 @@ import (
 	"sync"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/term"
@@ -41,6 +42,10 @@ const (
 	ErrReadFile                          = "Error reading file %s"
 	// ErrBuild are triggered when Docker can't build an image
 	ErrBuild = "Error building Docker image"
+	// ErrListImage is triggered if we can't list images
+	ErrListImage   = "Error listing images"
+	ErrTagImage    = "Error tagging image"
+	ErrRemoveImage = "Error removing image"
 	// ErrCreateClient are triggered when we can't connect to the Docker deamon
 	ErrCreateClient = "Error creating a new Docker client"
 	// ErrTarHeaderWrite are triggered when we can't write context header
@@ -119,8 +124,8 @@ func (db *DockerBuilder) Build() error {
 		return errors.Wrap(err, ErrCreateClient)
 	}
 	resp, err := dockerClient.ImageBuild(context.Background(), bytes.NewReader(db.context.Bytes()), types.ImageBuildOptions{
-		PullParent: true,
-		Tags:       db.tags,
+		PullParent:  true,
+		ForceRemove: true,
 	})
 	if err != nil {
 		return errors.Wrap(err, ErrBuild)
@@ -134,6 +139,43 @@ func (db *DockerBuilder) Build() error {
 	if err != nil {
 		return errors.Wrap(err, ErrOutputStream)
 	}
+	filterArgs := filters.NewArgs()
+	filterArgs.Add("label", "build_tag")
+	filterArgs.Add("dangling", "true")
+	images, err := dockerClient.ImageList(context.Background(), types.ImageListOptions{
+		Filters: filterArgs,
+	})
+	if err != nil {
+		return errors.Wrap(err, ErrListImage)
+	}
+	for _, image := range images {
+		tag := image.Labels["build_tag"]
+		if tag != "" {
+			fmt.Println("Tagging", image.ID, image.Labels["build_tag"])
+			err := dockerClient.ImageTag(context.Background(), image.ID, image.Labels["build_tag"])
+			if err != nil {
+				return errors.Wrap(err, ErrTagImage)
+			}
+		}
+	}
+	// Once tagged we need to make sure we remove the old dangling images so they are not picked up on next run
+	deletableImages, err := dockerClient.ImageList(context.Background(), types.ImageListOptions{
+		Filters: filterArgs,
+	})
+	if err != nil {
+		return errors.Wrap(err, ErrListImage)
+	}
+	for _, image := range deletableImages {
+		resp, err := dockerClient.ImageRemove(context.Background(), image.ID, types.ImageRemoveOptions{
+			Force:         true,
+			PruneChildren: true,
+		})
+		if err != nil {
+			return errors.Wrap(err, ErrRemoveImage)
+		}
+		fmt.Printf("Deleting: %v\n", resp)
+	}
+
 	return nil
 }
 
