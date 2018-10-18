@@ -124,7 +124,6 @@ func (db *DockerBuilder) Build() error {
 		return errors.Wrap(err, ErrCreateClient)
 	}
 	resp, err := dockerClient.ImageBuild(context.Background(), bytes.NewReader(db.context.Bytes()), types.ImageBuildOptions{
-		PullParent:  true,
 		ForceRemove: true,
 	})
 	if err != nil {
