@@ -44,12 +44,12 @@ If you plan on using ssh to fetch your repositories you’ll need to make sure y
 ## How does it work?
 
 In order to build an image, Docker creates a context. A context is just a word
-for a tar archive of the path passed to the build command. That context is then
+for a tar archive of a given folder passed to the build command. That context is then
 sent to the Docker deamon in order to build the image.
 
 `dmux` injects itself right before the context is created. It will create a
 context of its own made of all the files, folders and git repository passed in
-the front matter of the Dockerfile. After that it mimics how Docker works. 
+the front matter of the Dockerfile. After that, it mimics how Docker works. 
 
 ## Limits
 
